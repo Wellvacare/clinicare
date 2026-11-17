@@ -46,3 +46,13 @@ server/src   app.js (routes, auth) · services.js (business rules) · bot.js (bo
 server/test  acceptance.test.js
 client/src   pages/ · ui.jsx · charts.jsx · api.js
 ```
+
+## Deploy on Render
+
+1. Push this repo to GitHub, then in Render choose **New + > Blueprint** and select it (`render.yaml` is picked up).
+2. Fill in `PUBLIC_URL` (your final address), `ADMIN_EMAIL` and `ADMIN_PASSWORD` (10+ characters).
+3. First start creates that admin account only (no demo data). Note: there is no staff-management screen yet, so doctor and pharmacist accounts cannot be added from the UI until that is built.
+4. Add your subdomain under **Settings > Custom Domains** and create the CNAME Render shows you.
+
+The persistent disk at `/var/data` holds the database and uploaded reports; it requires a paid instance. Back it up with Render disk snapshots.
+Leave `ADMIN_EMAIL` unset to load demo data instead (testing only). Do not run `npm run seed` on a live server, it wipes the database.

@@ -1,0 +1,33 @@
+# Render Blueprint: New + > Blueprint, pick this repo.
+# A persistent disk needs a paid instance (Starter or higher).
+services:
+  - type: web
+    name: clinicare
+    runtime: node
+    plan: starter
+    buildCommand: npm run setup && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/meta
+    disk:
+      name: clinicare-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: 24
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: "1"
+      - key: DATA_DIR
+        value: /var/data
+      - key: JWT_SECRET
+        generateValue: true
+      - key: PUBLIC_URL
+        sync: false   # e.g. https://clinic.xyz.com
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false   # at least 10 characters
+      - key: ADMIN_NAME
+        value: Clinic Admin

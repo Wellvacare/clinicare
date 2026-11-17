@@ -2,7 +2,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { openDb } from './db.js';
-import { createApp } from './app.js';
+import { createApp, hashPassword } from './app.js';
 import { runDueReminders } from './services.js';
 import { seed } from './seed.js';
 
@@ -10,8 +10,16 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = process.env.DATA_DIR || path.join(here, '..', 'data');
 const db = openDb(path.join(dataDir, 'clinic.db'));
 if (!db.prepare('SELECT COUNT(*) AS c FROM users').get().c) {
-  console.log('Empty database, loading demo data…');
-  seed(db);
+  const { ADMIN_EMAIL, ADMIN_PASSWORD } = process.env;
+  if (ADMIN_EMAIL && ADMIN_PASSWORD) {
+    if (ADMIN_PASSWORD.length < 10) { console.error('ADMIN_PASSWORD must be at least 10 characters'); process.exit(1); }
+    db.prepare('INSERT INTO users (name,email,password_hash,role) VALUES (?,?,?,?)')
+      .run(process.env.ADMIN_NAME || 'Clinic Admin', ADMIN_EMAIL.toLowerCase(), hashPassword(ADMIN_PASSWORD), 'admin');
+    console.log(`Created admin account ${ADMIN_EMAIL}`);
+  } else {
+    console.log('Empty database, loading demo data…');
+    seed(db);
+  }
 }
 if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
   console.error('JWT_SECRET must be set in production'); process.exit(1);
